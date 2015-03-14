@@ -1,5 +1,7 @@
 (ns centipair.core.contrib.response
-  (:require  [cheshire.core :refer [generate-string]]))
+  (:require [ring.util.response :as ring-response]
+            [cheshire.core :refer [generate-string]]
+            [liberator.representation :refer [ring-response]]))
 
 
 (defn status-code
@@ -17,10 +19,17 @@
 
 
 (defn json-response
-  [json-data &[status]]
+  [json-data & [status]]
   (ring-response-format status
                         {"Content-Type" "application/json"}
                         (generate-string json-data)))
+
+
+
+(defn liberator-json-response [json-data & [status]]
+  (ring-response (ring-response-format status
+                        {"Content-Type" "application/json"}
+                        (generate-string json-data))))
 
 
 ;; cookies format {"username" {:value "alice"} 
@@ -32,3 +41,9 @@
    :headers {"Content-Type" "application/json"}
    :body (generate-string json-data)
    :cookies cookies})
+
+(defn liberator-json-response-cookies [json-data cookies & [status]]
+  (ring-response {:status (status-code status)
+                  :headers {"Content-Type" "application/json"}
+                  :body (generate-string json-data)
+                  :cookies cookies}))

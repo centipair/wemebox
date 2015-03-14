@@ -27,7 +27,7 @@
 (defn register-submit []
   (ajax/form-post
    registration-form-state
-   "/register-submit"
+   "/api/register"
    [email password confirm-password]
    (fn [response] (.log js.console "yay!!!"))
    ))

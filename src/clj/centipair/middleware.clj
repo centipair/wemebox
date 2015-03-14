@@ -28,7 +28,7 @@
 (defn production-middleware [handler]
   (-> handler
       
-      wrap-restful-format
+      (wrap-restful-format :formats [:json :edn :yaml :yaml-in-html :transit-json :transit-msgpack]) 
       (wrap-idle-session-timeout
         {:timeout (* 60 30)
          :timeout-response (redirect "/")})

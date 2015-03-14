@@ -59,7 +59,7 @@
     </script>
     {% block page-scripts %}
     {% endblock %}
-    {{csrfmiddlewaretoken|safe}}
+    <input type="hidden" value="{{csrf-token}}" id="__anti-forgery-token"/>
     <!-- scripts and styles -->
     <script type="text/javascript">
       var context = "{{servlet-context}}";

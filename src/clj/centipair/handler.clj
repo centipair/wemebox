@@ -2,6 +2,7 @@
   (:require [compojure.core :refer [defroutes routes]]
             [centipair.routes.home :refer [home-routes]]
             [centipair.core.auth.user.routes :refer [user-routes]]
+            [centipair.core.auth.user.api :refer [api-user-routes]]
             [centipair.middleware :refer [development-middleware
                                          production-middleware]]
             [centipair.session :as session]
@@ -51,8 +52,9 @@
 
 (def app
   (-> (routes
+       api-user-routes
        user-routes
        home-routes
        base-routes)
-      ;;development-middleware
+      development-middleware
       production-middleware))

@@ -123,7 +123,7 @@
           :params (reduce to-key {} form)
           :handler (partial success-handler function-handler)
           :error-handler (partial form-error-handler form-state form)
-          :format (json-request-format)
+          ;;:format (json-request-format)
           :headers {:X-CSRF-Token (dom/get-value "__anti-forgery-token")}
           :response-format (json-response-format {:keywords? true}))))
 
