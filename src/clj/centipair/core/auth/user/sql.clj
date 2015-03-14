@@ -5,7 +5,8 @@
         centipair.core.contrib.mail
         centipair.core.contrib.time
         centipair.core.contrib.cookies)
-  (:require [centipair.core.contrib.cryptography :as crypt]))
+  (:require [centipair.core.contrib.cryptography :as crypt]
+            [centipair.core.errors :as errors]))
 
 
 
@@ -54,7 +55,7 @@
   "Creates registration request"
   [user-account]
   (insert user_registration (values {:user_account_id (:user_account_id user-account)
-                                     :registration_key (crypt/random-base64 8)})))
+                                     :registration_key (crypt/uuid)})))
 
 
 (defn register-user
@@ -62,7 +63,7 @@
   [params]
   (let [user-account (new-user-account params)
         registration-request (create-registration-request user-account)]
-      (future (send-registration-email (assoc registration-request :email (:email user-account))))
+      (send-registration-email (assoc registration-request :email (:email user-account)))
       registration-success))
 
 
@@ -74,9 +75,18 @@
       (insert user_session (values {:user_account_id (:user_account_id user-account)
                                     :auth_token auth-token 
                                     :session_expiry (set-time-expiry 23)}))
-      (set-cookies :auth-token auth-token)
       (login-success user-account))))
 
+
+(defn check-login [params]
+  (let [user-account (select-user-email (:username params))]
+    (if (nil? user-account)
+      (errors/validation-error :username "User account not found")
+      (if (not (:active user-account))
+        (errors/validation-error :username "This account is inactive")
+        (if (crypt/check-password (:password params) (:password user-account))
+          true
+          (errors/validation-error :password "Password is wrong"))))))
 
 (defn login
   "Login DB operations"

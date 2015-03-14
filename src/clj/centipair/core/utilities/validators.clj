@@ -1,4 +1,4 @@
-(ns centipair.core.utilities.validation
+(ns centipair.core.utilities.validators
   "Functions for validating input and setting string errors on fields.
   All fields are simply keys, meaning this can be a general error storage and
   retrieval mechanism for the lifetime of a single request. Errors are not

@@ -13,7 +13,7 @@
 
 (defn send-registration-email [registration-request]
   (let [site-data site-settings
-        email-body (render-file "templates/email/registration.html" 
+        email-body (render-file "email/registration.html" 
                                 (assoc site-data :registration-key (str (:registration_key registration-request))))]
     (send-message email-settings
                   {:from (:email site-data)
@@ -24,7 +24,7 @@
 
 (defn send-password-reset-email [email password-reset-key]
   (let [site-data site-settings
-        email-body (render-file "templates/email/password-reset.html" 
+        email-body (render-file "email/password-reset.html" 
                                 (assoc site-data :reset-key password-reset-key))]
     (send-message email-settings
                   {:from (:email site-data)

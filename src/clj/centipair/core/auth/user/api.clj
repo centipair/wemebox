@@ -13,15 +13,19 @@
                   (user-models/validate-user-registration (:params (:request context))))
   :handle-unprocessable-entity (fn [context]
                                  (:validation-result context))
-  :post! (fn [context] "Success")
-  :handle-created (fn [context] (response/liberator-json-response {:register "success"}))
-  )
+  :post! (fn [context] (user-models/register-user (:params (:request context))))
+  :handle-created (fn [context] (response/liberator-json-response {:register "success"})))
+
 
 (defresource api-user-login []
   :available-media-types ["application/json"]
   :allowed-methods [:post]
+  :processable? (fn [context]
+                  (user-models/check-login (:params (:request context))))
+  :handle-unprocessable-entity (fn [context]
+                                 (:validation-result context))
   :post! (fn [context] (response/json-response {:test "success"}))
-  )
+  :handle-created (fn [context] (response/liberator-json-response {:login "success"})))
 
 (defroutes api-user-routes
   (POST "/api/register" [] (api-user-register))

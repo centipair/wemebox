@@ -52,10 +52,12 @@
 (defn login-submit []
   (ajax/form-post
    login-form-state
-   "/login-submit"
+   "/api/login"
    [username password]
    (fn [response] 
-     (.replace js/window.location (:redirect response)))))
+     ;;(.replace js/window.location (:redirect response))
+     (.log js/console (clj->js response))
+     )))
 
 (def login-submit-button (atom {:label "Submit" :on-click login-submit :id "login-submit-button"}))
 

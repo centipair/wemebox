@@ -3,7 +3,7 @@
   The user-model methods in this namesapce has to be implemented by the database system file"
   (:require [centipair.core.auth.user.sql :as user-model]
             [validateur.validation :refer :all]
-            [centipair.core.utilities.validation :as nv]))
+            [centipair.core.utilities.validators :as v]))
 
 ;;Interface
 (defn register-user
@@ -26,12 +26,18 @@
   (user-model/select-user-email value))
 
 
+(defn activate-account
+  [registration-key]
+  (user-model/activate-account registration-key))
 
+
+(defn check-login [params]
+  (user-model/check-login params))
 
 ;;validations
 (defn email-exist-check
   [value]
-  (if (nv/has-value? value)
+  (if (v/has-value? value)
     (if (nil? (select-user-email value))
       true
       false)))
@@ -46,8 +52,21 @@
 
 (defn validate-user-registration
   [params]
-  (println params)
   (let [validation-result (registration-validator params)]
+    (if (valid? validation-result)
+      true
+      [false {:validation-result {:errors validation-result}}])))
+
+
+(def login-validator
+  (validation-set
+   (presence-of :username :message "Please enter the email address you have registered.")
+   (presence-of :password :message "Please enter your password")))
+
+
+(defn validate-user-login
+  [params]
+  (let [validation-result (login-validator params)]
     (if (valid? validation-result)
       true
       [false {:validation-result {:errors validation-result}}])))
