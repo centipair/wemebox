@@ -1,4 +1,4 @@
-(ns centipair.core.auth.user.models
+(ns centipair.core.auth.user.nosql
     (:use 
      centipair.core.db.connection
      centipair.core.contrib.time
@@ -8,7 +8,8 @@
      clojurewerkz.cassaforte.uuids
      [centipair.core.utilities.validators :only [is-username? is-email-proxy?]])
     (:require 
-     [centipair.core.utilities.cryptography :as crypto]))
+     [centipair.core.contrib.cryptography :as crypto]
+     [centipair.core.errors :as errors]))
 
 
 (def early-access-table "early_access")
@@ -33,18 +34,15 @@
 
 
 (defn create-user-session [user-account]
-  (let [auth_token (generate-session-id)
+  (let [auth_token (crypto/generate-session-id)
         session-map {:auth_token auth_token
                      :session_expire_time (set-time-expiry 23)
                      :user_id (:user_id user-account)}]
-    (do
-      (insert-user-session session-map)
-      (set-cookies :auth_token auth_token)
-      (set-session :uid auth_token)
-      {:status-code 200 :message "login success" :redirect "/admin"})))
+    (insert-user-session session-map)
+    auth_token))
 
-(defn get-user-session []
-  (let [auth_token (get-cookies :auth_token)]
+(defn get-user-session [auth-token]
+  (let [auth_token auth-token]
     (if (nil? auth_token)
       nil
       (first (select (dbcon) user-session-table (where [[= :auth_token auth_token]]))))))
@@ -96,7 +94,8 @@
                                                    :user_id (:user_id user-map)}))
 
 
-(defn register-user [user-map]
+(defn register-user
+  [user-map]
   (let [user_id (insert-user-account (assoc user-map :active false))
         user-login-map {:user_id user_id
                         :email (:email user-map)
@@ -130,19 +129,29 @@
     (first (select-user-account (:user_id user-login)))))
 
 (defn valid-user-password? [user-account form]
-    (crypto/check-password (:password form) (:password user-account)))
+  (if (nil? (:password form))
+    false
+    (crypto/check-password (:password form) (:password user-account))))
 
 
-(defn login [form]
-  (let [user-login (get-user-login (:username form))
+(defn login [params]
+  (let [user-login (get-user-login (:username params))
+        user-account (get-user-account user-login)]
+    
+    (create-user-session user-account)))
+
+
+(defn check-login
+  [params]
+  (let [user-login (get-user-login (:username params))
         user-account (get-user-account user-login)]
     (if (or (nil? user-login) (nil? user-account))
-      login-error
+      (errors/validation-error :username "User account not found")
       (if (:active user-account)
-        (if (valid-user-password? user-account form)
-          (create-user-session user-account)
-          login-error)
-        inactive-user-error))))
+        (if (valid-user-password? user-account params)
+          true
+          (errors/validation-error :password "Password is wrong"))
+        (errors/validation-error :username "User account inactive")))))
 
 
 (defn activate-user-account [user-map]
@@ -155,7 +164,7 @@
   (delete (dbcon) user-account-registration-table (where [[= :registration_key (:registration_key user-map)]])))
 
 (defn activate-account [registration-key]
-  (let [registration-request (get-registration-key registration-key)]
+  (let [registration-request (get-registration-key (crypto/str-uuid registration-key))]
     (if (nil? registration-request)
       false
       (do 
@@ -234,3 +243,4 @@
     (if (nil? session)
       nil
       (:user_id session))))
+

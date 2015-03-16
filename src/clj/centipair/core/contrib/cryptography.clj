@@ -37,3 +37,7 @@
   "converts string to uuid format"
   [id]
   (java.util.UUID/fromString id))
+
+
+(defn generate-session-id []
+  (random-base64 32))

@@ -31,6 +31,7 @@
                  [clj-time "0.9.0"]
                  [buddy "0.4.1"]
                  [clojurewerkz/cassaforte "2.0.0"]
+                 [org.xerial.snappy/snappy-java "1.1.1.6"]
                  [org.clojure/clojurescript "0.0-2913"]
                  [reagent "0.5.0-alpha3"]
                  [secretary "1.2.1"]

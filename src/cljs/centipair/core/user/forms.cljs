@@ -11,7 +11,7 @@
 
 (def registration-form-state (atom {:title "Sign Up" :action "/register-submit" :id "registration-form"}))
 (def email (atom {:id "email" :type "email" :label "Email" :validator v/email-required} ))
-(def username (atom {:id "username" :type "text" :label "Email" :validator v/email-required} ))
+(def username (atom {:id "username" :type "text" :label "Username" :validator v/required} ))
 (def password (atom {:id "password" :type "password" :label "Password" :validator v/required}))
 (def accept-box-terms (atom {:id "box-terms" :type "checkbox" :label "Terms & Conditions" :validator v/agree-terms :description "I've read and accept terms & conditions"}))
 
@@ -28,7 +28,7 @@
   (ajax/form-post
    registration-form-state
    "/api/register"
-   [email password confirm-password]
+   [username email password confirm-password]
    (fn [response] (.log js.console "yay!!!"))
    ))
 
@@ -38,7 +38,7 @@
   (input/form-aligned  
    registration-form-state
    ;;[email password confirm-password accept-box-terms]
-   [email password confirm-password accept-box-terms]
+   [username email password confirm-password accept-box-terms]
    register-submit-button))
 
 

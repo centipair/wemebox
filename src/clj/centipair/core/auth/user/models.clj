@@ -1,7 +1,7 @@
 (ns centipair.core.auth.user.models
   "This provides an interface to various types of databases
   The user-model methods in this namesapce has to be implemented by the database system file"
-  (:require [centipair.core.auth.user.sql :as user-model]
+  (:require [centipair.core.auth.user.nosql :as user-model]
             [validateur.validation :refer :all]
             [centipair.core.utilities.validators :as v]))
 

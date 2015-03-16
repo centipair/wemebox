@@ -87,3 +87,15 @@
   [v n]
   (and (valid-number? v)
        (== (Long/parseLong v) n)))
+
+
+(defn is-username?
+  "Returns true if v is a valid username"
+  [v]
+  (if (nil? v)
+    false
+    (matches-regex? v #"^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$")))
+
+
+(defn is-email-proxy? [v]
+  (is-email? v)) 

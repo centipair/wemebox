@@ -24,8 +24,10 @@
                   (user-models/check-login (:params (:request context))))
   :handle-unprocessable-entity (fn [context]
                                  (:validation-result context))
-  :post! (fn [context] (response/json-response {:test "success"}))
-  :handle-created (fn [context] (response/liberator-json-response {:login "success"})))
+  :post! (fn [context]
+           {:auth-token (user-models/login (:params (:request context)))})
+  :handle-created (fn [context]
+                    (response/liberator-json-response-cookies {:message "success"} {:auth-token {:value (:auth-token context)}})))
 
 (defroutes api-user-routes
   (POST "/api/register" [] (api-user-register))
